@@ -10,12 +10,77 @@ class Transactions extends MY_Controller {
          $this->load->helper('number');
     }
     
-public function index() {
+public function index()
+{
     $this->require_login();
+
+    //  تشخیص درخواست AJAX (از Vue)
+    if ($this->input->get('ajax') == '1') {
+        // دریافت فیلترها
+        $filters = [
+            'search' => $this->input->get('search'),
+            'type'   => $this->input->get('type'),
+            'from'   => $this->input->get('from'),
+            'to'     => $this->input->get('to'),
+            'page'   => (int) ($this->input->get('page') ?: 1)
+        ];
+
+        // تبدیل تاریخ‌های شمسی به میلادی (همان کد قبلی)
+        $from_gregorian = !empty($filters['from']) 
+            ? jalali_to_gregorian_input(en_digits($filters['from'])) 
+            : '';
+        $to_gregorian = !empty($filters['to']) 
+            ? jalali_to_gregorian_input(en_digits($filters['to'])) 
+            : '';
+
+        $model_filters = [
+            'search' => $filters['search'],
+            'type'   => $filters['type'],
+            'from'   => $from_gregorian,
+            'to'     => $to_gregorian
+        ];
+
+        $per_page = 10;
+        $offset = ($filters['page'] > 1) ? ($filters['page'] - 1) * $per_page : 0;
+
+        $total = (int) $this->Transaction_model->count_by_filters($this->user_id, $model_filters);
+        $transactions = $this->Transaction_model->get_by_filters_paginated($this->user_id, $model_filters, $per_page, $offset);
+
+$formatted = [];
+foreach ($transactions as $tx) {
+    $jalali_date = '';
+    if (!empty($tx->transaction_date) && $tx->transaction_date !== '0000-00-00') {
+        $timestamp = strtotime($tx->transaction_date);
+        if ($timestamp !== false) {
+            $jalali_date = jdate('Y/m/d', $timestamp);
+        }
+    }
+
+    $formatted[] = [
+        'id' => $tx->id,
+        'transaction_date' => $jalali_date,
+        'category_name' => $tx->category_name ?? '---',
+        'description' => $tx->description,
+        'amount' => (int)$tx->amount,
+        'type' => $tx->type
+    ];
+}
+        // خروجی JSON
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode([
+                'transactions' => $formatted,
+                'total' => $total,
+                'totalPages' => ceil($total / $per_page),
+                'currentPage' => $filters['page']
+            ]));
+        
+        return;
+    }
+
+    // 🔹 اگر AJAX نبود → رفتار معمولی (صفحه HTML)
     $this->load->library('pagination');
 
-
-    // دریافت فیلترها از URL (GET parameters)
     $filters = [
         'search' => $this->input->get('search'),
         'type'   => $this->input->get('type'),
@@ -23,11 +88,9 @@ public function index() {
         'to'     => $this->input->get('to')
     ];
 
-    // تبدیل تاریخ‌های شمسی به میلادی (اگر وارد شده باشند)
     $from_gregorian = !empty($filters['from']) 
         ? jalali_to_gregorian_input(en_digits($filters['from'])) 
         : '';
-        
     $to_gregorian = !empty($filters['to']) 
         ? jalali_to_gregorian_input(en_digits($filters['to'])) 
         : '';
@@ -39,38 +102,30 @@ public function index() {
         'to'     => $to_gregorian
     ];
 
-    // تنظیمات صفحه‌بندی — همه چیز به عدد تبدیل شود
     $per_page = 3;
-    $page = (int) ($this->uri->segment(3) ?: 1); // پیش‌فرض صفحه ۱
-    
+    $page = (int) ($this->uri->segment(3) ?: 1);
     $offset = ($page > 1) ? ($page - 1) * $per_page : 0;
 
-    // دریافت داده‌ها (مطمئن شویم خروجی عدد است)
     $total_rows = (int) $this->Transaction_model->count_by_filters($this->user_id, $model_filters);
     $transactions = $this->Transaction_model->get_by_filters_paginated($this->user_id, $model_filters, $per_page, $offset);
 
-    // بارگذاری تنظیمات pagination
     $this->load->config('pagination');
     $config = $this->config->item('pagination');
-    // ✅ اطمینان از عدد بودن تمام پارامترهای حساس
     $config['base_url'] = base_url('transactions/index');
     $config['total_rows'] = $total_rows;
-    $config['per_page'] = (int) $per_page;
+    $config['per_page'] = $per_page;
     $config['uri_segment'] = 3;
     $config['use_page_numbers'] = TRUE;
 
-    // حفظ فیلترهای GET در لینک‌های صفحه‌بندی
     $query_string = trim($_SERVER['QUERY_STRING'] ?? '');
     if ($query_string !== '') {
         $config['suffix'] = '?' . $query_string;
         $config['first_url'] = $config['base_url'] . '/1?' . $query_string;
     }
 
-    // راه‌اندازی pagination
     $this->pagination->initialize($config);
     $pagination_links = $this->pagination->create_links();
 
-    // ارسال به ویو
     $data = [
         'page_title'   => 'مدیریت تراکنش‌ها',
         'user'         => $this->user,
@@ -82,7 +137,8 @@ public function index() {
 
     $this->load->view('layout', $data);
 }
-    public function create() {
+
+public function create() {
         $this->require_login();
 
         $data = [
@@ -264,5 +320,178 @@ public function index() {
 
         $this->user->balance = $balance;
     }
-} 
+    public function store()
+{
+    $this->require_login();
 
+    $data = json_decode(file_get_contents("php://input"), true);
+
+    if (!$data) {
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode([
+                'status' => 'error',
+                'message' => 'داده‌ای دریافت نشد'
+            ]));
+    }
+
+    // اعتبارسنجی ساده
+    if (
+        empty($data['type']) ||
+        empty($data['category_id']) ||
+        empty($data['amount']) ||
+        empty($data['transaction_date'])
+    ) {
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode([
+                'status' => 'error',
+                'message' => 'همه فیلدهای ضروری را پر کنید'
+            ]));
+    }
+
+    // تبدیل تاریخ شمسی به میلادی
+    $date = en_digits($data['transaction_date']);
+    $t = explode('/', $date);
+    $gregorian = jalali_to_gregorian($t[0], $t[1], $t[2], '-');
+
+    $transaction = [
+        'user_id'          => $this->user_id,
+        'type'             => $data['type'],
+        'category_id'      => $data['category_id'],
+        'amount'           => $data['amount'],
+        'transaction_date' => $gregorian,
+        'payment_method'   => $data['payment_method'] ?? 'cash',
+        'reference'        => $data['reference'] ?? null,
+        'description'      => $data['description'] ?? null,
+        'status'           => 'completed'
+    ];
+
+    if ($this->Transaction_model->create_transaction($transaction)) {
+
+        $this->recalc_user_balance();
+
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode([
+                'status' => 'success'
+            ]));
+    }
+
+    return $this->output
+        ->set_content_type('application/json')
+        ->set_output(json_encode([
+            'status' => 'error',
+            'message' => 'خطا در ذخیره تراکنش'
+        ]));
+}
+public function update($id)
+{
+    $this->require_login();
+
+    $data = json_decode(file_get_contents("php://input"), true);
+
+    if (!$data) {
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode([
+                'status' => 'error',
+                'message' => 'داده‌ای دریافت نشد'
+            ]));
+    }
+
+    // اعتبارسنجی
+    if (
+        empty($data['type']) ||
+        empty($data['category_id']) ||
+        empty($data['amount']) ||
+        empty($data['transaction_date'])
+    ) {
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode([
+                'status' => 'error',
+                'message' => 'همه فیلدهای ضروری را پر کنید'
+            ]));
+    }
+
+    // تاریخ
+    $date = en_digits($data['transaction_date']);
+    $t = explode('/', $date);
+    $gregorian = jalali_to_gregorian($t[0], $t[1], $t[2], '-');
+
+    $update = [
+        'type'             => $data['type'],
+        'category_id'      => $data['category_id'],
+        'amount'           => $data['amount'],
+        'transaction_date' => $gregorian,
+        'payment_method'   => $data['payment_method'] ?? 'cash',
+        'reference'        => $data['reference'] ?? null,
+        'description'      => $data['description'] ?? null
+    ];
+
+    $this->Transaction_model->update($id, $update);
+    $this->recalc_user_balance();
+
+    return $this->output
+        ->set_content_type('application/json')
+        ->set_output(json_encode([
+            'status' => 'success'
+        ]));
+}
+public function get($id)
+{
+    $this->require_login();
+
+    $transaction = $this->Transaction_model->get_by_id($id);
+
+    if (!$transaction || $transaction->user_id != $this->user_id) {
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode([
+                'status' => 'error',
+                'message' => 'تراکنش یافت نشد'
+            ]));
+    }
+
+    // تبدیل تاریخ میلادی به شمسی
+    if (!empty($transaction->transaction_date)) {
+        $transaction->transaction_date = jdate(
+            'Y/m/d',
+            strtotime($transaction->transaction_date)
+        );
+    }
+
+    return $this->output
+        ->set_content_type('application/json')
+        ->set_output(json_encode($transaction));
+}
+
+public function api($id)
+{
+    $this->require_login();
+
+    $t = $this->Transaction_model->get_by_id_and_user($id, $this->user_id);
+
+    if (!$t) {
+        return $this->output
+            ->set_status_header(404)
+            ->set_content_type('application/json')
+            ->set_output(json_encode(['message' => 'یافت نشد']));
+    }
+
+    $data = [
+        'id' => $t->id,
+        'type' => $t->type,
+        'category_id' => (string)$t->category_id, 
+        'amount' => (int)$t->amount,
+        'payment_method' => $t->payment_method,
+        'reference' => $t->reference,
+        'description' => $t->description,
+        'transaction_date' => jdate('Y/m/d', strtotime($t->transaction_date)),
+    ];
+
+    return $this->output
+        ->set_content_type('application/json')
+        ->set_output(json_encode($data));
+}} 

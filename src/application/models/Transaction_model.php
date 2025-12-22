@@ -144,6 +144,17 @@ public function count_by_filters($user_id, $filters) {
             ->from($this->table . ' t')
             ->join('categories c', 't.category_id = c.id');
     }
+    public function get_by_id_and_user($id, $user_id) {
+        if (!$id || !$user_id) {
+            return null;
+        }
+
+        $this->db->where('id', $id);
+        $this->db->where('user_id', $user_id);
+        $query = $this->db->get('transactions'); 
+
+        return $query->row(); 
+    }
 
     public function get_monthly_chart_data_filled($user_id, $months = 6) {
     // ۱. محاسبه ماه‌های مورد نظر (میلادی)

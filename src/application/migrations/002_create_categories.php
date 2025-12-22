@@ -80,105 +80,104 @@ class Migration_Create_categories extends CI_Migration {
         $this->db->query('CREATE INDEX user_id_index ON categories(user_id)');
         $this->db->query('CREATE INDEX type_index ON categories(type)');
         
-        // ✅ داده‌های پیش‌فرض اصلاح شده
-        $default_categories = array(
-            // درآمدها
-            array(
-                'user_id' => 1,
-                'name' => 'حقوق',
-                'type' => 'income', 
-                'color' => '#28a745',
-                'icon' => 'fa-money-bill',
-                'is_default' => 1,
-                'status' => 'active',
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s')
-            ),
-            array(
-                'user_id' => 1,
-                'name' => 'فروش',
-                'type' => 'income',
-                'color' => '#20c997',
-                'icon' => 'fa-store',
-                'is_default' => 1,
-                'status' => 'active',
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s')
-            ),
-            array(
-                'user_id' => 1,
-                'name' => 'سود سرمایه‌گذاری',
-                'type' => 'income',
-                'color' => '#17a2b8',
-                'icon' => 'fa-chart-line',
-                'is_default' => 1,
-                'status' => 'active',
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s')
-            ),
+        // $default_categories = array(
+        //     // درآمدها
+        //     array(
+        //         'user_id' => 1,
+        //         'name' => 'حقوق',
+        //         'type' => 'income', 
+        //         'color' => '#28a745',
+        //         'icon' => 'fa-money-bill',
+        //         'is_default' => 1,
+        //         'status' => 'active',
+        //         'created_at' => date('Y-m-d H:i:s'),
+        //         'updated_at' => date('Y-m-d H:i:s')
+        //     ),
+        //     array(
+        //         'user_id' => 1,
+        //         'name' => 'فروش',
+        //         'type' => 'income',
+        //         'color' => '#20c997',
+        //         'icon' => 'fa-store',
+        //         'is_default' => 1,
+        //         'status' => 'active',
+        //         'created_at' => date('Y-m-d H:i:s'),
+        //         'updated_at' => date('Y-m-d H:i:s')
+        //     ),
+        //     array(
+        //         'user_id' => 1,
+        //         'name' => 'سود سرمایه‌گذاری',
+        //         'type' => 'income',
+        //         'color' => '#17a2b8',
+        //         'icon' => 'fa-chart-line',
+        //         'is_default' => 1,
+        //         'status' => 'active',
+        //         'created_at' => date('Y-m-d H:i:s'),
+        //         'updated_at' => date('Y-m-d H:i:s')
+        //     ),
             
-            // هزینه‌ها
-            array(
-                'user_id' => 1,
-                'name' => 'خوراک',
-                'type' => 'expense',
-                'color' => '#dc3545',
-                'icon' => 'fa-utensils',
-                'is_default' => 1,
-                'status' => 'active',
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s')
-            ),
-            array(
-                'user_id' => 1,
-                'name' => 'حمل و نقل',
-                'type' => 'expense',
-                'color' => '#6f42c1',
-                'icon' => 'fa-car',
-                'is_default' => 1,
-                'status' => 'active',
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s')
-            ),
-            array(
-                'user_id' => 1,
-                'name' => 'مسکن',
-                'type' => 'expense',
-                'color' => '#e83e8c',
-                'icon' => 'fa-home',
-                'is_default' => 1,
-                'status' => 'active',
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s')
-            ),
-            array(
-                'user_id' => 1,
-                'name' => 'پوشاک',
-                'type' => 'expense',
-                'color' => '#fd7e14',
-                'icon' => 'fa-tshirt',
-                'is_default' => 1,
-                'status' => 'active',
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s')
-            ),
-            array(
-                'user_id' => 1,
-                'name' => 'سلامت',
-                'type' => 'expense',
-                'color' => '#6c757d',
-                'icon' => 'fa-heart',
-                'is_default' => 1,
-                'status' => 'active',
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s')
-            )
-        );
+        //     // هزینه‌ها
+        //     array(
+        //         'user_id' => 1,
+        //         'name' => 'خوراک',
+        //         'type' => 'expense',
+        //         'color' => '#dc3545',
+        //         'icon' => 'fa-utensils',
+        //         'is_default' => 1,
+        //         'status' => 'active',
+        //         'created_at' => date('Y-m-d H:i:s'),
+        //         'updated_at' => date('Y-m-d H:i:s')
+        //     ),
+        //     array(
+        //         'user_id' => 1,
+        //         'name' => 'حمل و نقل',
+        //         'type' => 'expense',
+        //         'color' => '#6f42c1',
+        //         'icon' => 'fa-car',
+        //         'is_default' => 1,
+        //         'status' => 'active',
+        //         'created_at' => date('Y-m-d H:i:s'),
+        //         'updated_at' => date('Y-m-d H:i:s')
+        //     ),
+        //     array(
+        //         'user_id' => 1,
+        //         'name' => 'مسکن',
+        //         'type' => 'expense',
+        //         'color' => '#e83e8c',
+        //         'icon' => 'fa-home',
+        //         'is_default' => 1,
+        //         'status' => 'active',
+        //         'created_at' => date('Y-m-d H:i:s'),
+        //         'updated_at' => date('Y-m-d H:i:s')
+        //     ),
+        //     array(
+        //         'user_id' => 1,
+        //         'name' => 'پوشاک',
+        //         'type' => 'expense',
+        //         'color' => '#fd7e14',
+        //         'icon' => 'fa-tshirt',
+        //         'is_default' => 1,
+        //         'status' => 'active',
+        //         'created_at' => date('Y-m-d H:i:s'),
+        //         'updated_at' => date('Y-m-d H:i:s')
+        //     ),
+        //     array(
+        //         'user_id' => 1,
+        //         'name' => 'سلامت',
+        //         'type' => 'expense',
+        //         'color' => '#6c757d',
+        //         'icon' => 'fa-heart',
+        //         'is_default' => 1,
+        //         'status' => 'active',
+        //         'created_at' => date('Y-m-d H:i:s'),
+        //         'updated_at' => date('Y-m-d H:i:s')
+        //     )
+        // );
         
-        // فقط اگر جدول خالی است داده‌ها را اضافه کن
-        if ($this->db->count_all('categories') == 0) {
-            $this->db->insert_batch('categories', $default_categories);
-        }
+        // // فقط اگر جدول خالی است داده‌ها را اضافه کن
+        // if ($this->db->count_all('categories') == 0) {
+        //     $this->db->insert_batch('categories', $default_categories);
+        // }
     }
 
     public function down()

@@ -54,7 +54,4 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $route['default_controller'] = 'auth';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
-$route['test'] = 'test/index';
-$route['dashboard/test'] = 'dashboard/test';
-// هیچ route دیگری تعریف نکنید - سیستم به صورت خودکار کار می‌کند
 ?>
