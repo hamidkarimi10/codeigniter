@@ -51,7 +51,6 @@ class MY_Controller extends CI_Controller {
     
     /**
      * Redirect to dashboard if already logged in
-     * این متد گم شده بود!
      */
     protected function redirect_if_logged_in() {
         if ($this->is_logged_in) {
@@ -73,17 +72,14 @@ class MY_Controller extends CI_Controller {
         redirect('auth/login');
     }
     protected function render($view, $data = []) {
-    // اضافه کردن user به همه viewها
     $data['user'] = $this->user;
     $data['user_id'] = $this->user_id;
     $data['is_logged_in'] = $this->is_logged_in;
     
-    // اگر layout دارید
     if (file_exists(APPPATH . 'views/layout.php')) {
         $data['content'] = $view;
         $this->load->view('layout', $data);
     } else {
-        // بدون layout
         $this->load->view($view, $data);
     }
 }

@@ -14,7 +14,6 @@ public function index()
 {
     $this->require_login();
 
-    //  تشخیص درخواست AJAX (از Vue)
     if ($this->input->get('ajax') == '1') {
         // دریافت فیلترها
         $filters = [
@@ -78,7 +77,6 @@ foreach ($transactions as $tx) {
         return;
     }
 
-    // 🔹 اگر AJAX نبود → رفتار معمولی (صفحه HTML)
     $this->load->library('pagination');
 
     $filters = [
@@ -163,9 +161,9 @@ public function create() {
 
                   // تبدیل تاریخ شمسی به میلادی
             if (!empty($transaction_data['transaction_date'])) {
-                // ✅ تبدیل اعداد فارسی/عربی به انگلیسی
+                //  تبدیل اعداد فارسی/عربی به انگلیسی
                 $transaction_data['transaction_date'] = en_digits($transaction_data['transaction_date']);
-                // ✅ تبدیل شمسی به میلادی
+                //  تبدیل شمسی به میلادی
                 // $transaction_data['transaction_date'] = jalali_to_gregorian_input($transaction_data['transaction_date']);
                     $t=explode("/" , $transaction_data['transaction_date']);
                     $r=jalali_to_gregorian ($t[0] , $t[1] , $t[2] , "-");

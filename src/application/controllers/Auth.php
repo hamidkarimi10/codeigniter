@@ -8,14 +8,19 @@ class Auth extends MY_Controller
     {
         parent::__construct();
 
-        // If user is logged in, redirect to dashboard
-        if ($this->is_logged_in && $this->uri->segment(2) !== 'logout') {
-            redirect('dashboard');
-        }
 
         $this->load->library('form_validation');
         $this->load->helper('form');
         $this->load->model('User_model');
+         $this->check_remember();
+
+        if (
+            $this->session->userdata('logged_in') &&
+            $this->router->method !== 'logout'
+        ) {
+            redirect('dashboard');
+        }
+
     }
 
     public function index()
@@ -29,8 +34,10 @@ class Auth extends MY_Controller
         if ($data) {
             $_POST = $data;
         }
-        // کاربر لاگین کرده نباشد
-        $this->redirect_if_logged_in();
+        // $this->redirect_if_logged_in();
+        if ($this->session->userdata('logged_in')) {
+    redirect('dashboard');
+}
 
         $data = [
             'page_title' => 'ورود به سیستم',
@@ -60,7 +67,14 @@ class Auth extends MY_Controller
 
                     if ($this->input->post('remember_me')) {
                         $token = bin2hex(random_bytes(16));
-                        set_cookie('remember_token', $token, 30 * 24 * 60 * 60);
+                        set_cookie([
+                            'name' => 'remember_token',
+                            'value' =>  $token,
+                            'expire' => 30 * 24 * 60 * 60 ,
+                            'path' => '/',
+                            'secure' => false ,
+                            'httponly' => true
+                        ]);
                         $this->User_model->update_remember_token($user->id, $token);
                     }
 
@@ -160,7 +174,6 @@ class Auth extends MY_Controller
             }
         }
 
-        // رندر صفحه فقط برای درخواست عادی
         if (!$isAjax) {
             $data['page_title'] = 'ثبت نام';
             $this->render('auth/register', $data);
@@ -169,8 +182,38 @@ class Auth extends MY_Controller
 
     public function logout()
     {
-        $this->session->sess_destroy();
-        delete_cookie('remember_token');
-        redirect('auth/login');
+        $user_id = $this->session->userdata('user_id');
+
+    if ($user_id) {
+        $this->User_model->update($user_id, ['remember_token' => null]);
     }
+
+    delete_cookie('remember_token');
+
+    unset($_COOKIE['remember_token']);
+
+    $this->session->sess_destroy();
+
+    redirect('auth/login');
+    }
+protected function check_remember() {
+    
+    if (!$this->session->userdata('user_id') && get_cookie('remember_token')) {
+        $token = get_cookie('remember_token');
+        $user = $this->User_model->get_by_token($token);
+
+        if ($user) {
+            $this->session->set_userdata([
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'first_name' => $user->first_name,
+                'last_name' => $user->last_name,
+                'logged_in' => true
+            ]);
+        } else {
+            delete_cookie('remember_token');
+        }
+    }
+}
+
 }

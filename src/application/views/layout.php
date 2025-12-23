@@ -60,7 +60,6 @@ body {
     padding: .375rem .75rem .375rem 2.25rem;
     background-position: left .75rem center;
 }
-
     </style>
 </head>
 

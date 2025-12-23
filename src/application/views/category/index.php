@@ -44,7 +44,7 @@
           <div>
             <strong>{{ cat.name }}</strong>
             <span
-              class="badge ms-2"
+              class="badge me-2"
               :class="cat.type === 'income' ? 'bg-success' : 'bg-danger'"
             >
               {{ cat.type === 'income' ? 'درآمد' : 'هزینه' }}
@@ -172,7 +172,7 @@ createApp({
 
     // ایجاد
     const openCreateModal = () => {
-      createForm.value = { name: '', type: 'expense' };
+      createForm.value = { name: '', type: '' };
       new bootstrap.Modal(document.getElementById('createModal')).show();
     };
 

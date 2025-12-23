@@ -12,6 +12,11 @@ class User_model extends MY_Model {
     public function get_by_email($email) {
         return $this->get_one_where(['email' => $email]);
     }
+
+    // public function set_remember_token($user_id, $token) {
+    //     $hashed = password_hash($token, PASSWORD_DEFAULT);
+    //     return $this->update($user_id, ['remember_token' => $hashed]);
+    // }
     
     public function get_by_token($token) {
         return $this->get_one_where(['remember_token' => $token]);
@@ -20,6 +25,11 @@ class User_model extends MY_Model {
     public function update_remember_token($user_id, $token) {
         return $this->update($user_id, ['remember_token' => $token]);
     }
+
+    public function clear_remember_token($user_id)
+{
+    return $this->update($user_id, ['remember_token' => null]);
+}
     
     public function get_user_categories($user_id) {
         if (!isset($this->Category_model)) {

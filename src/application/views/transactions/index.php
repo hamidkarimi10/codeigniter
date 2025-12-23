@@ -173,7 +173,9 @@ createApp({
     const fetchTransactions = async (page = 1) => {
       loading.value = true;
       try {
-        const params = { ajax: 1, page, ...filters.value };
+        const searchValue = filters.value.search.trim();
+
+        const params = { ajax: 1, page, ...filters.value, search: searchValue };
         Object.keys(params).forEach(k => { if (!params[k]) delete params[k]; });
 
         const res = await axios.get('/transactions', { params });
@@ -193,7 +195,6 @@ createApp({
       try {
         const res = await axios.get('/transactions/get_categories', { params: { type } });
         allCategories.value = res.data || [];
-        // پاک کردن دسته‌بندی نامرتبط
         if (filters.value.category_id && !allCategories.value.some(c => c.id == filters.value.category_id))
           filters.value.category_id = '';
       } catch (err) { allCategories.value = []; }
@@ -218,7 +219,8 @@ createApp({
       try {
         const res = await axios.get(`/transactions/api/${id}`);
         const t = res.data;
-        editForm.value = { ...t, category_id: String(t.category_id), payment_method: t.payment_method || 'cash', reference: t.reference || '', description: t.description || '' };
+        editForm.value = { ...t, category_id: String(t.category_id),
+          payment_method: t.payment_method || 'cash', reference: t.reference || '', description: t.description || '' };
         await loadEditCategories(t.type);
         nextTick(() => {
           const input = document.querySelector('.persia-datepicker-edit');
@@ -238,16 +240,35 @@ createApp({
     };
 
     const deleteTransaction = async (id) => {
-      const result = await Swal.fire({ title: 'آیا مطمئن هستید؟', text: 'این تراکنش حذف خواهد شد!', icon: 'warning', showCancelButton: true, confirmButtonText: 'بله، حذف شود!', cancelButtonText: 'لغو' });
-      if (result.isConfirmed) { try { await axios.delete(`/transactions/delete/${id}`); Swal.fire('حذف شد!', 'تراکنش با موفقیت حذف شد.', 'success'); fetchTransactions(currentPage.value); } catch (err) { Swal.fire('خطا!', 'خطا در حذف تراکنش.', 'error'); } }
+      const result = await Swal.fire({
+         title: 'آیا مطمئن هستید؟',
+          text: 'این تراکنش حذف خواهد شد!',
+           icon: 'warning',
+            showCancelButton: true,
+             confirmButtonText: 'بله، حذف شود!',
+             cancelButtonText: 'لغو' });
+      if (result.isConfirmed) { try { await axios.delete(`/transactions/delete/${id}`);
+         Swal.fire('حذف شد!', 'تراکنش با موفقیت حذف شد.', 'success');
+          fetchTransactions(currentPage.value);
+         } catch (err) { 
+          Swal.fire('خطا!', 'خطا در حذف تراکنش.', 'error');
+         } 
+        }
     };
 
-    const resetFilters = () => { filters.value = { search: '', type: '', from: '', to: '', category_id: '' }; fetchTransactions(1); };
-    const changePage = page => { if (page >= 1 && page <= totalPages.value) fetchTransactions(page); };
+    const resetFilters = () => { filters.value = { search: '', type: '', from: '', to: '', category_id: '' };
+     fetchTransactions(1);
+     };
+    const changePage = page => { if (page >= 1 && page <= totalPages.value) fetchTransactions(page);
+     };
 
     const initDatepickers = () => {
       document.querySelectorAll('.persia-datepicker').forEach(input => {
-        $(input).persianDatepicker({ format: 'YYYY/MM/DD', autoClose: true, calendar: { persian: { leapYearMode: 'astronomical' } }, onSelect: unix => { const dateStr = new persianDate(unix).format('YYYY/MM/DD'); input.value = dateStr; input.dispatchEvent(new Event('input', { bubbles: true })); } });
+        $(input).persianDatepicker({ format: 'YYYY/MM/DD', 
+          autoClose: true,
+           calendar: { persian: { leapYearMode: 'astronomical' }
+           },
+         onSelect: unix => { const dateStr = new persianDate(unix).format('YYYY/MM/DD'); input.value = dateStr; input.dispatchEvent(new Event('input', { bubbles: true })); } });
       });
     };
 
