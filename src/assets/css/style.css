@@ -1,0 +1,147 @@
+body {
+    font-family: 'Vazir', sans-serif;
+    background-color: #f6f7fb;
+    direction: rtl;
+    text-align: right;
+    transition: background 0.3s, color 0.3s;
+    
+}
+
+    .stat-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+                }
+    .stat-card.income { border-right: 5px solid #28a745; }
+    .stat-card.expense { border-right: 5px solid #dc3545; }
+    .stat-card.balance { border-right: 5px solid #0d6efd; }
+
+    .form-select {
+    padding: .375rem .75rem .375rem 2.25rem;
+    background-position: left .75rem center;
+    }
+.theme {
+  min-height: 100vh;
+  transition: background 0.3s, color 0.3s;
+}
+
+.btn-close{
+  color: white;
+}
+
+/* ☀️ حالت روز */
+.theme.light {
+  background-color: #f6f7fb;
+  color: #212529;
+    padding-top: 1.5rem;
+
+}
+
+/* 🌙 حالت شب */
+.theme.dark {
+  background-color: #121212;
+  color: #f1f1f1;
+    padding-top: 1.5rem;
+
+}
+
+/* کارت‌ها */
+.theme.dark .card,
+.theme.dark .stat-card {
+  background-color: #1e1e1e;
+  color: #fff;
+}
+
+/* جدول‌ها */
+.theme.dark table , .table-striped {
+  background-color: #1a1a1a;
+  color: #fff;
+}
+
+/* input */
+.theme.dark input,
+.theme.dark select,
+.theme.dark textarea {
+  background-color: #1e1e1e;
+  color: #fff;
+  border-color: #333;
+}
+
+/* جدول تراکنش‌ها */
+.theme.dark .table {
+  color: #f1f1f1;
+  background-color: #1e1e1e;
+}
+
+.theme.dark .table th,
+.theme.dark .table td {
+  background-color: #1e1e1e !important;
+  color: #f1f1f1;
+  border-color: #333;
+}
+
+/* table striped */
+.theme.dark .table-striped > tbody > tr:nth-of-type(odd) > * {
+  background-color: #181818 !important;
+}
+
+/* hover */
+.theme.dark .table-hover tbody tr:hover {
+  background-color: #222 !important;
+}
+
+/* لیست تراکنش */
+.theme.dark .list-group-item {
+  background-color: #1e1e1e;
+  color: #f1f1f1;
+  border-color: #333;
+}
+
+/* کارت‌های تراکنش */
+.theme.dark .transaction-item,
+.theme.dark .card.transaction {
+  background-color: #1e1e1e;
+  color: #fff;
+  border-color: #333;
+}
+
+/* همه متن‌ها */
+.theme.dark,
+.theme.dark p,
+.theme.dark div,
+.theme.dark small,
+.theme.dark label,
+.theme.dark th,
+.theme.dark li,
+.theme.dark a {
+  color: #f1f1f1 !important;
+}
+
+/* حالت دارک برای تمام فرم‌ها و اینپوت‌ها داخل modal */
+#theme-wrapper.dark input,
+#theme-wrapper.dark textarea,
+#theme-wrapper.dark select,
+#theme-wrapper.dark .form-control {
+    background-color: #2c2c2c; /* پس‌زمینه تیره */
+    color: #fff;              /* رنگ متن سفید */
+    border-color: #555;       /* رنگ حاشیه دلخواه */
+}
+
+/* placeholder سفید */
+#theme-wrapper.dark ::placeholder {
+    color: #bbb;
+}
+
+/* focus برای input */
+#theme-wrapper.dark input:focus,
+#theme-wrapper.dark textarea:focus,
+#theme-wrapper.dark select:focus {
+    background-color: #2c2c2c;
+    color: #fff;
+    border-color: #0d6efd; /* یا رنگ دلخواه */
+}
+#theme-wrapper.dark .modal-content {
+    background-color: #1e1e1e;
+    color: #fff;
+}

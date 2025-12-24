@@ -75,7 +75,7 @@
       <div class="modal-content">
         <div class="modal-header d-flex justify-content-between align-items-center">
           <h5>ایجاد دسته‌بندی</h5>
-          <button class="btn-close ms-0" data-bs-dismiss="modal"></button>
+          <button class="btn-close ms-0" :class="isDarkMode ? 'btn-close-white' : ''" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
           <input
@@ -84,6 +84,7 @@
             placeholder="نام"
           >
           <select v-model="createForm.type" class="form-select">
+            <option value="" disabled selected>انتخاب نوع...</option>
             <option value="income">درآمد</option>
             <option value="expense">هزینه</option>
           </select>
@@ -108,7 +109,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5>ویرایش دسته‌بندی</h5>
-          <button class="btn-close" data-bs-dismiss="modal"></button>
+          <button class="btn-close" :class="isDarkMode ? 'btn-close-white' : ''" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
           <input
@@ -138,6 +139,7 @@ createApp({
   setup() {
     const categories = ref([]);
     const loading = ref(false);
+    const isDarkMode = ref(false);
 
     const filters = ref({
       type: '',

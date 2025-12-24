@@ -63,7 +63,7 @@
       <form @submit.prevent="fetchTransactions" class="row g-3">
         <div class="col-md-4">
           <label class="form-label">توضیحات</label>
-          <input v-model="filters.search" type="text" class="form-control" placeholder="مثلاً خرید...">
+          <input v-model="filters.search" type="text" @input="onSearchInput" class="form-control" placeholder="مثلاً خرید...">
         </div>
         <div class="col-md-2">
           <label class="form-label">نوع تراکنش</label>
@@ -75,7 +75,7 @@
         </div>
         <div class="col-md-2">
           <label class="form-label">دسته‌بندی</label>
-          <select v-model="filters.category_id" class="form-select">
+          <select v-model="filters.category_id" class="form-select" @change="onFilterCategoryChange">
             <option value="">همه</option>
             <option v-for="cat in allCategories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
           </select>
@@ -170,25 +170,27 @@ createApp({
     const formatNumber = num => new Intl.NumberFormat('fa-IR').format(num);
 
     // دریافت تراکنش‌ها
-    const fetchTransactions = async (page = 1) => {
-      loading.value = true;
-      try {
-        const searchValue = filters.value.search.trim();
+const fetchTransactions = async (page = 1) => {
+    loading.value = true;
+    try {
+          const searchValue = filters.value.search.trim();
 
-        const params = { ajax: 1, page, ...filters.value, search: searchValue };
+        // حذف فیلترهای خالی
+        const params = { ajax: 1, page, ...filters.value, search:searchValue };
         Object.keys(params).forEach(k => { if (!params[k]) delete params[k]; });
 
         const res = await axios.get('/transactions', { params });
         const data = res.data;
-        transactions.value = Array.isArray(data) ? data : data.transactions || data.data || [];
+
+        transactions.value = Array.isArray(data) ? data : data.transactions || [];
         totalPages.value = data.totalPages || Math.ceil((data.total || transactions.value.length) / (data.perPage || 10));
         currentPage.value = page;
-      } catch (err) {
+    } catch (err) {
         Swal.fire('خطا!', err.response?.data?.message || 'خطا در بارگذاری تراکنش‌ها.', 'error');
         transactions.value = [];
         totalPages.value = 1;
-      } finally { loading.value = false; }
-    };
+    } finally { loading.value = false; }
+};
 
     // دریافت دسته‌بندی‌ها (برای فیلتر)
     const fetchAllCategories = async (type = null) => {
@@ -200,7 +202,23 @@ createApp({
       } catch (err) { allCategories.value = []; }
     };
 
-    const onFilterTypeChange = () => fetchAllCategories(filters.value.type);
+const onFilterTypeChange = async () => {
+    await fetchAllCategories(filters.value.type); 
+    filters.value.category_id = ''; 
+    fetchTransactions(1); 
+};
+
+const onFilterCategoryChange = async () => {
+    fetchTransactions(1); 
+};
+
+let debounceTimer;
+const onSearchInput = () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+        fetchTransactions(1);
+    }, 300); // 300ms بعد از آخرین تایپ اجرا میشه
+};
 
     // بارگذاری دسته‌بندی‌ها برای modal ویرایش
     const loadEditCategories = async (type) => {
@@ -276,7 +294,7 @@ createApp({
 
     return {
       transactions, loading, currentPage, totalPages, filters, formatNumber, fetchTransactions, resetFilters, changePage, deleteTransaction, allCategories,
-      editForm, editCategories, loadingEdit, openEditModal, updateTransaction, onFilterTypeChange, onEditTypeChange
+      editForm, editCategories, loadingEdit, openEditModal, updateTransaction, onFilterTypeChange, onEditTypeChange,onSearchInput, onFilterCategoryChange
     };
   }
 }).mount('#transactions-app');

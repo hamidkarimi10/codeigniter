@@ -1,4 +1,3 @@
-
 <div id="dashboardApp" class="container mt-4">
     <!-- خوش آمدگویی -->
     <div class="row mb-4">
@@ -56,7 +55,7 @@
                     <h5 class="card-title mb-0">📊 روند ماهانه درآمد و هزینه</h5>
                 </div>
                 <div class="card-body">
-                    <canvas id="financialChart" height="300"></canvas>
+                    <canvas id="financialChart" height="450"></canvas>
                 </div>
             </div>
         </div>
@@ -79,7 +78,7 @@
                                 </div>
                                 <div class="text-end text-nowrap">
                                     <span :class="tx.type === 'income' ? 'text-success fw-bold' : 'text-danger fw-bold'">
-                                        {{ tx.type === 'income' ? '+' : '-' }}{{ formatNumber(tx.amount) }}
+                                        {{ formatNumber(tx.amount) }}
                                     </span>
                                     <small class="text-muted">تومان</small>
                                 </div>
@@ -101,7 +100,6 @@
 
 
 <script>
-// تعریف داده‌ها (همانند قبل)
 window.DASHBOARD_DATA = {
     user: <?= json_encode($user) ?>,
     financial_summary: <?= json_encode($financial_summary) ?>,
@@ -109,7 +107,6 @@ window.DASHBOARD_DATA = {
     monthly_data: <?= json_encode($monthly_data) ?>
 };
 
-// تبدیل امن monthly_data
 if (typeof window.DASHBOARD_DATA.monthly_data === 'string') {
     try {
         window.DASHBOARD_DATA.monthly_data = JSON.parse(window.DASHBOARD_DATA.monthly_data);
@@ -123,13 +120,11 @@ const { createApp, ref, onMounted, nextTick } = Vue;
 
 createApp({
   setup() {
-    // Stateها
     const user = ref({});
     const financial_summary = ref({ total_income: 0, total_expense: 0 });
     const recent_transactions = ref([]);
     const monthly_data = ref([]);
 
-    // تبدیل اعداد به فارسی
     const toPersianDigits = (str) => {
       const en = '0123456789';
       const fa = '۰۱۲۳۴۵۶۷۸۹';
@@ -213,7 +208,6 @@ createApp({
     };
 
     onMounted(() => {
-      // داده‌ها را از window بخوان
       const data = window.DASHBOARD_DATA || {};
       user.value = data.user || {};
       financial_summary.value = data.financial_summary || { total_income: 0, total_expense: 0 };

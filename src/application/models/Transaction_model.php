@@ -126,6 +126,9 @@ public function count_by_filters($user_id, $filters) {
         if (!empty($filters['type'])) {
             $this->db->where('t.type', $filters['type']);
         }
+        if (!empty($filters['category_id'])) {
+            $this->db->where('t.category_id', $filters['category_id']);
+        }
         if (!empty($filters['search'])) {
             $this->db->group_start()
                 ->like('t.description', $filters['search'])

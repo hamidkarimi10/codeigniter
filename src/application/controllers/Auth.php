@@ -70,7 +70,8 @@ class Auth extends MY_Controller
                         set_cookie([
                             'name' => 'remember_token',
                             'value' =>  $token,
-                            'expire' => 30 * 24 * 60 * 60 ,
+                            // 'expire' => 30 * 24 * 60 * 60 ,
+                            'expire' => 60,
                             'path' => '/',
                             'secure' => false ,
                             'httponly' => true
@@ -116,7 +117,7 @@ class Auth extends MY_Controller
         if ($this->input->post()) {
             $this->form_validation->set_rules('first_name', 'نام', 'required|min_length[2]');
             $this->form_validation->set_rules('last_name', 'نام خانوادگی', 'required|min_length[2]');
-            $this->form_validation->set_rules('email', 'ایمیل', 'required|valid_email');
+            $this->form_validation->set_rules('email', 'ایمیل', 'required|regex_match[/^[\w\-\.]+@([\w\-]+\.)+[\w\-]{2,4}$/]');
             $this->form_validation->set_rules('password', 'رمز عبور', 'required|min_length[6]');
             $this->form_validation->set_rules('confirm_password', 'تکرار رمز عبور', 'required|matches[password]');
 

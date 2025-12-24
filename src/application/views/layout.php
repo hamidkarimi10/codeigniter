@@ -21,9 +21,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://unpkg.com/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css">
 
+    <!--css -->
+    <link href="<?= base_url('assets/css/style.css') ?>" rel="stylesheet">
+
     <!-- jquery -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 
@@ -37,30 +39,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
-<style>
-
-body {
-    font-family: 'Vazir', sans-serif;
-    background-color: #f6f7fb;
-    direction: rtl;
-    text-align: right;
-}
-
-        .stat-card {
-            background: #fff;
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-        }
-        .stat-card.income { border-right: 5px solid #28a745; }
-        .stat-card.expense { border-right: 5px solid #dc3545; }
-        .stat-card.balance { border-right: 5px solid #0d6efd; }
-
-        .form-select {
-    padding: .375rem .75rem .375rem 2.25rem;
-    background-position: left .75rem center;
-}
-    </style>
 </head>
 
 <body>
@@ -98,6 +76,10 @@ body {
     </a>
   </li>
     </ul>
+    <button id="theme-toggle" class="btn btn-outline-secondary">
+  🌙
+</button>
+
 
     <div class="d-flex align-items-center gap-4 order-3">
       <div class="bi bi-calendar-event text-white d-none d-lg-block">
@@ -112,6 +94,7 @@ body {
                  class="rounded-circle" width="40" height="40">
             <?= htmlspecialchars($user->first_name . ' ' . $user->last_name) ?>
           </a>
+          
           <ul class="dropdown-menu dropdown-menu-end shadow" style="direction: rtl; text-align: right;">
             <li>
                 <a class="dropdown-item d-flex align-items-center justify-content-between gap-2" 
@@ -135,70 +118,17 @@ body {
 </nav>
 
 <?php endif; ?>
-<div id="app">
 
-    <!-- Navbar -->
-    <!-- <nav v-if="user" class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
-        <div class="container">
-            <a class="navbar-brand fw-bold" :href="baseUrl + 'dashboard'">
-                <i class="bi bi-wallet2"></i> مدیریت مالی
-            </a>
-
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuBar">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-
-            <div class="collapse navbar-collapse" id="menuBar">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" :href="baseUrl + 'dashboard'">
-                            <i class="bi bi-speedometer2"></i> داشبورد
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" :href="baseUrl + 'transactions'">
-                            <i class="bi bi-arrow-left-right"></i> تراکنش‌ها
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" :href="baseUrl + 'transactions/create'">
-                            <i class="bi bi-plus-circle"></i> اضافه کردن
-                        </a>
-                    </li>
-                </ul>
-
-                <ul class="navbar-nav">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle fw-bold d-flex align-items-center gap-2"
-                           href="#" data-bs-toggle="dropdown">
-                            <img :src="user.avatar ? baseUrl + user.avatar : baseUrl + 'assets/img/default-avatar.png'"
-                                 class="rounded-circle" width="40" height="40">
-                            {{ user.first_name }} {{ user.last_name }}
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end shadow">
-                            <li><a class="dropdown-item" :href="baseUrl + 'user/profile'">پروفایل من</a></li>
-                            <li><a class="dropdown-item" :href="baseUrl + 'auth/logout'">خروج</a></li>
-                        </ul>
-                    </li>
-                </ul>
-
-                <div class="text-white ms-3">
-                    تاریخ امروز : {{ today }}
-                </div>
-            </div>
-        </div>
-    </nav>
-
-     Content -->
-    <div class="container mt-4">
-           <div class="container mt-4">
+<div id="theme-wrapper" class="theme light">
+<div id="app">     
+    <div class="container">
+           <div class="container">
         <?php if (isset($content)): ?>
             <?php $this->load->view($content); ?>
         <?php endif; ?>
     </div>
-
     </div> 
-
+    </div>
 </div>
 <script>
     window.SERVER_DATA = {
@@ -217,7 +147,40 @@ body {
         alert(message) {
             alert("this send from Application: " + message)
         },
-    }
+    };
+    const themeWrapper = document.getElementById('theme-wrapper');
+const toggleBtn = document.getElementById('theme-toggle');
+
+// خواندن تم ذخیره‌شده
+const savedTheme = localStorage.getItem('theme') || 'light';
+themeWrapper.classList.remove('light', 'dark');
+themeWrapper.classList.add(savedTheme);
+toggleBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+// کلیک روی دکمه
+toggleBtn.addEventListener('click', () => {
+  const isDark = themeWrapper.classList.contains('dark');
+  
+  themeWrapper.classList.toggle('dark', !isDark);
+  themeWrapper.classList.toggle('light', isDark);
+
+  localStorage.setItem('theme', isDark ? 'light' : 'dark');
+  toggleBtn.textContent = isDark ? '🌙' : '☀️';
+});
+
+function showAlert(title, text, icon) {
+    const isDark = document.body.classList.contains('dark'); // یا از wrapper چک کن
+    Swal.fire({
+        title: title,
+        text: text,
+        icon: icon,
+        background: isDark ? '#1e1e1e' : '#fff',  // پس‌زمینه
+        color: isDark ? '#fff' : '#000',          // رنگ متن
+        iconColor: icon === 'success' ? '#28a745' : (icon === 'error' ? '#dc3545' : '#007bff'),
+        confirmButtonColor: isDark ? '#444' : '#0d6efd',
+    });
+}
+
 </script>
 
 <!-- <script>
