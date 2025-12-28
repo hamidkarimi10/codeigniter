@@ -63,11 +63,11 @@
       <form @submit.prevent="fetchTransactions" class="row g-3">
         <div class="col-md-4">
           <label class="form-label">توضیحات</label>
-          <input v-model="filters.search" type="text" @input="onSearchInput" class="form-control" placeholder="مثلاً خرید...">
+          <input v-model="filters.search" type="text" class="form-control" placeholder="مثلاً خرید...">
         </div>
         <div class="col-md-2">
           <label class="form-label">نوع تراکنش</label>
-          <select v-model="filters.type" class="form-select" @change="onFilterTypeChange">
+          <select v-model="filters.type" class="form-select" >
             <option value="">همه</option>
             <option value="income">درآمد</option>
             <option value="expense">هزینه</option>
@@ -75,9 +75,11 @@
         </div>
         <div class="col-md-2">
           <label class="form-label">دسته‌بندی</label>
-          <select v-model="filters.category_id" class="form-select" @change="onFilterCategoryChange">
+          <select v-model="filters.category_name" class="form-select" >
             <option value="">همه</option>
-            <option v-for="cat in allCategories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+            <option v-for="cat in allCategories" :key="cat.id" :value="cat.name">
+            {{ cat.name }}
+          </option>
           </select>
         </div>
         <div class="col-md-2">
@@ -157,7 +159,7 @@ createApp({
     const loading = ref(false);
     const currentPage = ref(1);
     const totalPages = ref(1);
-    const filters = ref({ search: '', type: '', from: '', to: '', category_id: '' });
+    const filters = ref({ search: '', type: '', from: '', to: '', category_name: '' });
     const allCategories = ref([]);
 
     const editForm = ref({
@@ -170,63 +172,50 @@ createApp({
     const formatNumber = num => new Intl.NumberFormat('fa-IR').format(num);
 
     // دریافت تراکنش‌ها
-const fetchTransactions = async (page = 1) => {
-    loading.value = true;
-    try {
-          const searchValue = filters.value.search.trim();
+    const fetchTransactions = async (page = 1) => {
+      loading.value = true;
+      try {
+        const params = { ajax: 1, page };
 
-        // حذف فیلترهای خالی
-        const params = { ajax: 1, page, ...filters.value, search:searchValue };
-        Object.keys(params).forEach(k => { if (!params[k]) delete params[k]; });
+        if (filters.value.search) params.search = filters.value.search.trim();
+        if (filters.value.category_name) params.category_name = filters.value.category_name || undefined;
+        if (filters.value.type) params.type = filters.value.type;
+        if (filters.value.from) params.from = filters.value.from;
+        if (filters.value.to) params.to = filters.value.to;
 
         const res = await axios.get('/transactions', { params });
         const data = res.data;
 
-        transactions.value = Array.isArray(data) ? data : data.transactions || [];
-        totalPages.value = data.totalPages || Math.ceil((data.total || transactions.value.length) / (data.perPage || 10));
+        transactions.value = data.transactions || [];
+        totalPages.value = data.totalPages || 1;
         currentPage.value = page;
-    } catch (err) {
-        Swal.fire('خطا!', err.response?.data?.message || 'خطا در بارگذاری تراکنش‌ها.', 'error');
+      } catch (err) {
+        console.error('خطا در دریافت تراکنش‌ها:', err);
         transactions.value = [];
         totalPages.value = 1;
-    } finally { loading.value = false; }
-};
-
-    // دریافت دسته‌بندی‌ها (برای فیلتر)
-    const fetchAllCategories = async (type = null) => {
-      try {
-        const res = await axios.get('/transactions/get_categories', { params: { type } });
-        allCategories.value = res.data || [];
-        if (filters.value.category_id && !allCategories.value.some(c => c.id == filters.value.category_id))
-          filters.value.category_id = '';
-      } catch (err) { allCategories.value = []; }
+      } finally { loading.value = false; }
     };
 
-const onFilterTypeChange = async () => {
-    await fetchAllCategories(filters.value.type); 
-    filters.value.category_id = ''; 
-    fetchTransactions(1); 
-};
+    // دریافت دسته‌بندی‌ها (همیشه همه)
+    const fetchAllCategories = async () => {
+      try {
+        const res = await axios.get('/category/get_categories');
+        allCategories.value = res.data || [];
+      } catch (err) {
+        allCategories.value = [];
+      }
+    };
 
-const onFilterCategoryChange = async () => {
-    fetchTransactions(1); 
-};
+    let debounceTimer;
+    const onSearchInput = () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => fetchTransactions(1), 300);
+    };
 
-let debounceTimer;
-const onSearchInput = () => {
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => {
-        fetchTransactions(1);
-    }, 300); // 300ms بعد از آخرین تایپ اجرا میشه
-};
-
-    // بارگذاری دسته‌بندی‌ها برای modal ویرایش
     const loadEditCategories = async (type) => {
       try {
         const res = await axios.get('/transactions/get_categories', { params: { type } });
         editCategories.value = res.data || [];
-        if (editForm.value.category_id && !editCategories.value.some(c => c.id == editForm.value.category_id))
-          editForm.value.category_id = '';
       } catch (err) { editCategories.value = []; }
     };
 
@@ -237,8 +226,7 @@ const onSearchInput = () => {
       try {
         const res = await axios.get(`/transactions/api/${id}`);
         const t = res.data;
-        editForm.value = { ...t, category_id: String(t.category_id),
-          payment_method: t.payment_method || 'cash', reference: t.reference || '', description: t.description || '' };
+        editForm.value = { ...t, category_id: String(t.category_id), payment_method: t.payment_method || 'cash', reference: t.reference || '', description: t.description || '' };
         await loadEditCategories(t.type);
         nextTick(() => {
           const input = document.querySelector('.persia-datepicker-edit');
@@ -260,41 +248,35 @@ const onSearchInput = () => {
     const deleteTransaction = async (id) => {
       const result = await Swal.fire({
          title: 'آیا مطمئن هستید؟',
-          text: 'این تراکنش حذف خواهد شد!',
-           icon: 'warning',
-            showCancelButton: true,
-             confirmButtonText: 'بله، حذف شود!',
-             cancelButtonText: 'لغو' });
-      if (result.isConfirmed) { try { await axios.delete(`/transactions/delete/${id}`);
-         Swal.fire('حذف شد!', 'تراکنش با موفقیت حذف شد.', 'success');
+         text: 'این تراکنش حذف خواهد شد!',
+         icon: 'warning',
+         showCancelButton: true,
+         confirmButtonText: 'بله، حذف شود!',
+         cancelButtonText: 'لغو'
+      });
+      if (result.isConfirmed) {
+        try {
+          await axios.delete(`/transactions/delete/${id}`);
+          Swal.fire('حذف شد!', 'تراکنش با موفقیت حذف شد.', 'success');
           fetchTransactions(currentPage.value);
-         } catch (err) { 
-          Swal.fire('خطا!', 'خطا در حذف تراکنش.', 'error');
-         } 
-        }
+        } catch (err) { Swal.fire('خطا!', 'خطا در حذف تراکنش.', 'error'); }
+      }
     };
 
-    const resetFilters = () => { filters.value = { search: '', type: '', from: '', to: '', category_id: '' };
-     fetchTransactions(1);
-     };
-    const changePage = page => { if (page >= 1 && page <= totalPages.value) fetchTransactions(page);
-     };
+    const resetFilters = () => { filters.value = { search: '', type: '', from: '', to: '', category_name: '' }; fetchTransactions(1); };
+    const changePage = page => { if (page >= 1 && page <= totalPages.value) fetchTransactions(page); };
 
     const initDatepickers = () => {
       document.querySelectorAll('.persia-datepicker').forEach(input => {
-        $(input).persianDatepicker({ format: 'YYYY/MM/DD', 
-          autoClose: true,
-           calendar: { persian: { leapYearMode: 'astronomical' }
-           },
-         onSelect: unix => { const dateStr = new persianDate(unix).format('YYYY/MM/DD'); input.value = dateStr; input.dispatchEvent(new Event('input', { bubbles: true })); } });
+        $(input).persianDatepicker({ format: 'YYYY/MM/DD', autoClose: true, calendar: { persian: { leapYearMode: 'astronomical' } }, onSelect: unix => { const dateStr = new persianDate(unix).format('YYYY/MM/DD'); input.value = dateStr; input.dispatchEvent(new Event('input', { bubbles: true })); } });
       });
     };
 
-    onMounted(() => { initDatepickers(); fetchTransactions(); fetchAllCategories(); });
+    onMounted(() => { initDatepickers(); fetchAllCategories(); fetchTransactions(); });
 
     return {
       transactions, loading, currentPage, totalPages, filters, formatNumber, fetchTransactions, resetFilters, changePage, deleteTransaction, allCategories,
-      editForm, editCategories, loadingEdit, openEditModal, updateTransaction, onFilterTypeChange, onEditTypeChange,onSearchInput, onFilterCategoryChange
+      editForm, editCategories, loadingEdit, openEditModal, updateTransaction
     };
   }
 }).mount('#transactions-app');

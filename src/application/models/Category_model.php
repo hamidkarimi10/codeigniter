@@ -13,9 +13,19 @@ class Category_model extends MY_Model {
         return $this->get_where(['user_id' => $user_id], 'name', 'ASC');
     }
 
+public function get_all($order_by = null, $order_dir = 'ASC') {
+    if (!$order_by) $order_by = 'name';
+    if (!$order_dir) $order_dir = 'ASC';
+    return $this->db->order_by($order_by, $order_dir)->get($this->table)->result();
+}
     public function create($data) {
     return $this->db->insert('categories', $data);
 }
+    public function get_by_type($type) {
+        if (!$type) return $this->get_all();
+            return $this->db->where('type', $type)->order_by('name', 'ASC')->get($this->table)->result();
+        }
+
     
     public function get_income_categories($user_id = null) {
         $this->db->where('type', 'income');

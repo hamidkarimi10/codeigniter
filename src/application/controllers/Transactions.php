@@ -19,6 +19,8 @@ public function index()
         $filters = [
             'search' => $this->input->get('search'),
             'type'   => $this->input->get('type'),
+            // 'category_id' => $this->input->get('category_id'),
+             'category_name' => $this->input->get('category_name'),
             'from'   => $this->input->get('from'),
             'to'     => $this->input->get('to'),
             'page'   => (int) ($this->input->get('page') ?: 1)
@@ -35,6 +37,8 @@ public function index()
         $model_filters = [
             'search' => $filters['search'],
             'type'   => $filters['type'],
+            // 'category_id' =>$filters['category_id'],
+            'category_name' =>$filters['category_name'],
             'from'   => $from_gregorian,
             'to'     => $to_gregorian
         ];
@@ -465,6 +469,7 @@ public function get($id)
         ->set_output(json_encode($transaction));
 }
 
+
 public function api($id)
 {
     $this->require_login();
@@ -492,4 +497,5 @@ public function api($id)
     return $this->output
         ->set_content_type('application/json')
         ->set_output(json_encode($data));
-}} 
+}
+} 

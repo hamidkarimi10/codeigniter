@@ -75,10 +75,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
       <i class="bi bi-tag"></i> دسته‌بندی‌ها
     </a>
   </li>
-    </ul>
+   <li class="nav-item">
     <button id="theme-toggle" class="btn btn-outline-secondary">
-  🌙
-</button>
+      🌙
+    </button>
+   </li>
+    </ul>
+   
 
 
     <div class="d-flex align-items-center gap-4 order-3">
@@ -151,7 +154,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     const themeWrapper = document.getElementById('theme-wrapper');
 const toggleBtn = document.getElementById('theme-toggle');
 
-// خواندن تم ذخیره‌شده
 const savedTheme = localStorage.getItem('theme') || 'light';
 themeWrapper.classList.remove('light', 'dark');
 themeWrapper.classList.add(savedTheme);
@@ -169,13 +171,13 @@ toggleBtn.addEventListener('click', () => {
 });
 
 function showAlert(title, text, icon) {
-    const isDark = document.body.classList.contains('dark'); // یا از wrapper چک کن
+    const isDark = document.body.classList.contains('dark'); 
     Swal.fire({
         title: title,
         text: text,
         icon: icon,
-        background: isDark ? '#1e1e1e' : '#fff',  // پس‌زمینه
-        color: isDark ? '#fff' : '#000',          // رنگ متن
+        background: isDark ? '#1e1e1e' : '#fff',  
+        color: isDark ? '#fff' : '#000',          
         iconColor: icon === 'success' ? '#28a745' : (icon === 'error' ? '#dc3545' : '#007bff'),
         confirmButtonColor: isDark ? '#444' : '#0d6efd',
     });

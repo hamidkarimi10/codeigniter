@@ -70,8 +70,8 @@ class Auth extends MY_Controller
                         set_cookie([
                             'name' => 'remember_token',
                             'value' =>  $token,
-                            // 'expire' => 30 * 24 * 60 * 60 ,
-                            'expire' => 60,
+                            'expire' => 30 * 24 * 60 * 60 ,
+                            // 'expire' => 60,
                             'path' => '/',
                             'secure' => false ,
                             'httponly' => true

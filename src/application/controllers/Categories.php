@@ -66,4 +66,9 @@ class Categories extends MY_Controller {
             ->set_content_type('application/json')
             ->set_output(json_encode($categories));
     }
+    public function get_categories() {
+        $type = $this->input->get('type'); 
+        $categories = $type ? $this->Category_model->get_by_type($type) : $this->Category_model->get_all();
+        echo json_encode($categories);
+    }
 }

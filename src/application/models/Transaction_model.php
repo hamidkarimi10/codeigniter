@@ -126,6 +126,15 @@ public function count_by_filters($user_id, $filters) {
         if (!empty($filters['type'])) {
             $this->db->where('t.type', $filters['type']);
         }
+        // if (!empty($filters['category_id'])) {
+        //     $category_id = (int) $filters['category_id']; // ← تبدیل به عدد
+        //     if ($category_id > 0) {
+        //         $this->db->where('t.category_id', $category_id);
+        //     }
+        // }
+        if (!empty($filters['category_name'])) {
+    $this->db->where('c.name', $filters['category_name']);
+}
         if (!empty($filters['category_id'])) {
             $this->db->where('t.category_id', $filters['category_id']);
         }

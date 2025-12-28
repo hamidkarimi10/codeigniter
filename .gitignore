@@ -1,2 +1,4 @@
 db/*
 init/*
+src/writable/*
+src/uploads/*

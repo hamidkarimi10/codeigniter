@@ -12,16 +12,13 @@ class MY_Controller extends CI_Controller {
         
         $this->load->helper(['url', 'cookie']);
         
-        // Initialize user data
         $this->initialize_user();
     }
     
     protected function initialize_user() {
-        // Check if session exists
         if (isset($this->session)) {
             $this->user_id = $this->session->userdata('user_id');
         } else {
-            // Fallback to native PHP session
             $this->user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
         }
         
@@ -59,9 +56,6 @@ class MY_Controller extends CI_Controller {
         }
     }
     
-    /**
-     * Simple logout
-     */
     protected function logout() {
         if (isset($this->session)) {
             $this->session->sess_destroy();
